@@ -10,8 +10,15 @@ def main(term):
     else:
         for i,result in enumerate(results.results):
             print i, result.url, result.text
-        choice = int(raw_input('Open which URL?'))
-        os.system('open %s' % results.results[choice].url)
+        browser = raw_input('[o]pen (default) or [l]inks? ').lower()
+        print browser
+        if browser in ['o', 'open', '']:
+            choice = int(raw_input('Open which URL? '))
+            os.system('open %s' % results.results[choice].url)
+        elif browser in ['l', 'links']:
+            choice = int(raw_input('Open which URL? '))
+            os.system('links %s' % results.results[choice].url)
 
 if __name__ == '__main__':
-    main(' '.join(sys.argv[1:]))
+    if len(sys.argv) > 1:
+        main(' '.join(sys.argv[1:]))
