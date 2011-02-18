@@ -52,7 +52,7 @@ def download(url):
     try:
         Popen(['wget', '-c', url], cwd=directory()).communicate()
     except OSError:
-        Popen(['curl', '-C', '-', '-O', '-L', url], cwd=dl_dir).communicate()
+        Popen(['curl', '-C', '-', '-O', '-L', url], cwd=directory()).communicate()
     return os.path.join(directory(), url.split('/')[-1])
 
 def get_resolution():
