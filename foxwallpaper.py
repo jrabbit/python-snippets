@@ -49,7 +49,10 @@ def is_first_run():
         return False
 
 def download(url):
-    Popen(['wget', '-c', url], cwd=directory()).communicate()
+    try:
+        Popen(['wget', '-c', url], cwd=directory()).communicate()
+    except OSError:
+        Popen(['curl', '-C', '-', '-O', '-L', url], cwd=dl_dir).communicate()
     return os.path.join(directory(), url.split('/')[-1])
 
 def get_resolution():
