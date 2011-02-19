@@ -9,7 +9,8 @@ import feedparser
 import anydbm
 from BeautifulSoup import BeautifulSoup
 
-from appscript import app, mactypes
+if platform.system() == 'Darwin':
+    from appscript import app, mactypes
 
 def get_wallpapers(entry=0):
     feed = "http://thefoxisblack.com/category/the-desktop-wallpaper-project/feed/"
@@ -73,8 +74,16 @@ def set_desktop_mac(path):
     # /usr/bin/defaults write /Library/Preferences/com.apple.loginwindow DesktopPicture "/path/to/the picture.jpg"
     app('Finder').desktop_picture.set(mactypes.File(path))
 
+def set_desktop_feh(path):
+    #feh --bg-fill file
+    # Also --bg-scale, --bg-seamless, --bg-tile exist
+    Popen(['feh', '--bg-fill', path]).communicate()
+
 if __name__ == '__main__':
     db = get_db()
     if is_first_run():
         db['size'] = get_resolution()
-    set_desktop_mac(download(get_wallpapers()[db['size']]))
+    if platform.system() == 'Darwin':
+        set_desktop_mac(download(get_wallpapers()[db['size']]))
+    if platform.system() == 'Linux':
+        set_desktop_feh(download(get_wallpapers()[db['size']]))
