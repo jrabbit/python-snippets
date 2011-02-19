@@ -5,6 +5,8 @@ import os
 import re
 import platform
 from subprocess import *
+from decimal import *
+import math
 import feedparser
 import anydbm
 from BeautifulSoup import BeautifulSoup
@@ -68,7 +70,18 @@ def get_resolution():
         stdout=PIPE, stderr=PIPE).communicate()[0]
         expr = re.compile('Resolution')
         resolution = filter(expr.search, profiler.splitlines())[0]
-        return resolution.split()[1] + 'x' + resolution.split()[3]
+        return round_resolution(resolution.split()[1])
+
+def round_resolution(xval):
+    """Take resolution and round it (Upward, the image setter can scale it) to the closest availible image size. Justification for x value: widescreens."""
+    #(Decimal(decimal)/nearest).quantize(1)*nearest
+    res_x = xval
+    avail = {1440:900, 1920:1200, 1280:800, 1680:1050, 2560:1440}
+    z = {}
+    for given_x in avail.keys():
+        z[math.fabs(1 - (Decimal(res_x)/Decimal(given_x)))] = given_x
+    good_x = z[min(z.keys())]
+    return str(good_x) + 'x' + str(avail[good_x])
 
 def set_desktop_mac(path):
     # /usr/bin/defaults write /Library/Preferences/com.apple.loginwindow DesktopPicture "/path/to/the picture.jpg"
