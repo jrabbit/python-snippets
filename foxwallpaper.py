@@ -91,6 +91,7 @@ def convert_img(img):
     savename = os.path.join( directory(), img[:-4] + '.bmp')
     image = Image.open(img)
     image.save(savename, "BMP")
+    return savename
 def set_desktop_win(path):
     "Must be BMP or jpg in >XP"
     SPI_SETDESKWALLPAPER = 20
@@ -115,4 +116,4 @@ if __name__ == '__main__':
     if platform.system() == 'Linux':
         set_desktop_feh(download(get_wallpapers()[db['size']]))
     if platform.system() == 'Windows':
-        pass
+        set_desktop_win(convert_img(download(get_wallpapers()[db['size']])))
