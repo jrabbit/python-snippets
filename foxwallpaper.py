@@ -13,6 +13,9 @@ from BeautifulSoup import BeautifulSoup
 
 if platform.system() == 'Darwin':
     from appscript import app, mactypes
+if platform.system() == 'Windows':
+    from ctypes import windll
+    from PIL import Image
 
 def get_wallpapers(entry=0):
     feed = "http://thefoxisblack.com/category/the-desktop-wallpaper-project/feed/"
@@ -82,7 +85,18 @@ def round_resolution(xval):
         z[math.fabs(1 - (Decimal(res_x)/Decimal(given_x)))] = given_x
     good_x = z[min(z.keys())]
     return str(good_x) + 'x' + str(avail[good_x])
-
+#Windows Stuff
+def convert_img(img):
+    "Refrenced http://gabbpuy.blogspot.com/2007/02/set-windows-wallpaper-from-python.html"
+    savename = os.path.join( directory(), img[:-4] + '.bmp')
+    image = Image.open(img)
+    image.save(savename, "BMP")
+def set_desktop_win(path):
+    "Must be BMP or jpg in >XP"
+    SPI_SETDESKWALLPAPER = 20
+    windll.user32.SystemParametersInfoA(SPI_SETDESKWALLPAPER, 0, path , 0)
+    
+#end windows stuff
 def set_desktop_mac(path):
     # /usr/bin/defaults write /Library/Preferences/com.apple.loginwindow DesktopPicture "/path/to/the picture.jpg"
     app('Finder').desktop_picture.set(mactypes.File(path))
@@ -100,3 +114,5 @@ if __name__ == '__main__':
         set_desktop_mac(download(get_wallpapers()[db['size']]))
     if platform.system() == 'Linux':
         set_desktop_feh(download(get_wallpapers()[db['size']]))
+    if platform.system() == 'Windows':
+        pass
