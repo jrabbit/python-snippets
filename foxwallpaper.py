@@ -62,11 +62,13 @@ def download(url):
     return os.path.join(directory(), url.split('/')[-1])
 
 def get_resolution():
+    if platform.system() == 'Windows':
+        return round_resolution(windll.user32.GetSystemMetrics(0))
     try:
         #Prefered xrandr method. Broken on stock Apple X11.
         out = Popen(['xrandr'], stdout=PIPE, stderr=PIPE).communicate()[0]
         real = out.split('\n')[0].split(',')[-1].split()
-        return real[1] + 'x' + real[3]
+        return round_resolution(real[1])
     # /usr/sbin/system_profiler SPDisplaysDataType | grep Resolution
     except IndexError:
         profiler = Popen(['system_profiler', 'SPDisplaysDataType'],
@@ -74,6 +76,7 @@ def get_resolution():
         expr = re.compile('Resolution')
         resolution = filter(expr.search, profiler.splitlines())[0]
         return round_resolution(resolution.split()[1])
+    
 
 def round_resolution(xval):
     """Take resolution and round it (Upward, the image setter can scale it) to the closest availible image size. Justification for x value: widescreens."""
@@ -102,6 +105,14 @@ def set_desktop_mac(path):
     # /usr/bin/defaults write /Library/Preferences/com.apple.loginwindow DesktopPicture "/path/to/the picture.jpg"
     app('Finder').desktop_picture.set(mactypes.File(path))
 
+def set_desktop_linux(path):
+    if Popen(['which','gconftool-2']).communicate():
+        #gconftool-2 --set /desktop/gnome/background/picture_filename --type string '/path/to/file.jpg'
+        Popen(['gconftool-2', '--set', '/desktop/gnome/background/picture_filename', '--type', 'string', path]).communicate()
+    else:
+        set_desktop_feh(path)
+        
+
 def set_desktop_feh(path):
     #feh --bg-fill file
     # Also --bg-scale, --bg-seamless, --bg-tile exist
@@ -114,6 +125,6 @@ if __name__ == '__main__':
     if platform.system() == 'Darwin':
         set_desktop_mac(download(get_wallpapers()[db['size']]))
     if platform.system() == 'Linux':
-        set_desktop_feh(download(get_wallpapers()[db['size']]))
+        set_desktop_linux(download(get_wallpapers()[db['size']]))
     if platform.system() == 'Windows':
         set_desktop_win(convert_img(download(get_wallpapers()[db['size']])))
