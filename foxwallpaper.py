@@ -24,7 +24,7 @@ def get_wallpapers(entry=0):
     urls = {}
     for x in soup.findAll('a'):
         if  x['href'].split('-')[-1][-3:] == "jpg":
-            urls[x['href'].split('-')[-1][:-4]] = x['href']
+            urls[x['href'].split('-')[-1][:-4].split("_")[-1]] = x['href']
     return urls
 
 def directory(name="foxwallpaper"):
