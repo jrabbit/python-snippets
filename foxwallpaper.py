@@ -65,17 +65,17 @@ def get_resolution():
     if platform.system() == 'Windows':
         return round_resolution(windll.user32.GetSystemMetrics(0))
     try:
-        #Prefered xrandr method. Broken on stock Apple X11.
-        out = Popen(['xrandr'], stdout=PIPE, stderr=PIPE).communicate()[0]
-        real = out.split('\n')[0].split(',')[-1].split()
-        return round_resolution(real[1])
-    # /usr/sbin/system_profiler SPDisplaysDataType | grep Resolution
-    except IndexError:
         profiler = Popen(['system_profiler', 'SPDisplaysDataType'],
         stdout=PIPE, stderr=PIPE).communicate()[0]
         expr = re.compile('Resolution')
         resolution = filter(expr.search, profiler.splitlines())[0]
         return round_resolution(resolution.split()[1])
+    # /usr/sbin/system_profiler SPDisplaysDataType | grep Resolution
+    except OSError:
+        #Prefered xrandr method. Broken on stock Apple X11.
+        out = Popen(['xrandr'], stdout=PIPE, stderr=PIPE).communicate()[0]
+        real = out.split('\n')[0].split(',')[-1].split()
+        return round_resolution(real[1])
     
 
 def round_resolution(xval):
