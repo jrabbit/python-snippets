@@ -9,7 +9,7 @@ from decimal import *
 import math
 import feedparser
 import anydbm
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 
 if platform.system() == 'Darwin':
     from appscript import app, mactypes
@@ -22,7 +22,7 @@ def get_wallpapers(entry=0):
     d = feedparser.parse(feed)
     soup = BeautifulSoup(d.entries[entry].content[0].value)
     urls = {}
-    for x in soup.findAll('a'):
+    for x in soup.find_all('a'):
         if  x['href'].split('-')[-1][-3:] == "jpg":
             urls[x['href'].split('-')[-1][:-4].split("_")[-1]] = x['href']
     return urls
